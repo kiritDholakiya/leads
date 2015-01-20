@@ -187,8 +187,14 @@ if (!class_exists('Inbound_Forms')) {
 					if ($type === "hidden" || $type === "honeypot" || $type === "html-block" || $type === "divider") {
 						$show_labels = false;
 					}
-
-					$form .= '<div class="inbound-field '.$main_layout.' label-'.$form_labels_class.' '.$form_labels_class.' '.$field_container_class.'">';
+                    
+                    // added by kirit dholakiya for validation of multiple checkbox 
+                    $div_chk_req = '';
+                    if($type=='checkbox' && $required=='1')
+                    {
+                        $div_chk_req =' checkbox-required ';
+                    }
+					$form .= '<div class="inbound-field '.$div_chk_req.$main_layout.' label-'.$form_labels_class.' '.$form_labels_class.' '.$field_container_class.'">';
 
 					if ($show_labels && $form_labels != "bottom" || $type === "radio") {
 						$form .= '<label for="'. $field_name .'" class="inbound-label '.$formatted_label.' '.$form_labels_class.' inbound-input-'.$type.'" style="'.$font_size.'">' . $matches[3][$i]['label'] . $req_label . '</label>';
@@ -290,7 +296,8 @@ if (!class_exists('Inbound_Forms')) {
 
 							$required_id = ( $key == 0 ) ? $req : '';
 
-							$form .= '<input class="checkbox-'.$main_layout.' checkbox-'.$form_labels_class.' '.$field_input_class.'" type="checkbox" name="'. $field_name .'[]" value="'. $checkbox_val .'" '.$required_id.'>'.$checkbox_val_trimmed.'<br>';
+							$form .= '<input class="checkbox-'.$main_layout.' checkbox-'.$form_labels_class.' '.$field_input_class.'" type="checkbox" name="'. $field_name .'[]" value="'. $checkbox_val .'" >'.$checkbox_val_trimmed.'<br>';
+                            //'.$required_id.' remvoed from above line by kirit dholakiya on 20 - january -2015
 						}
 					} else if ($type === 'html-block') {
 
@@ -427,7 +434,17 @@ if (!class_exists('Inbound_Forms')) {
 				jQuery(document).ready(function($){
 
 				jQuery("form").submit(function(e) {
-					jQuery(this).find("input").each(function(){
+				    
+                    // added below condition for check any of checkbox checked or not by kirit dholakiya
+                    if(jQuery(\'.checkbox-required input[type=checkbox]:checked\').length==0)
+                    {
+                        jQuery(\'.checkbox-required input[type=checkbox]:first\').focus();
+                        alert("Oops! Looks like you have not filled out all of the required fields!");
+                        e.preventDefault();
+						e.stopImmediatePropagation();    
+                    }
+                    
+                    jQuery(this).find("input").each(function(){
 						if(!jQuery(this).prop("required")){
 						} else if (!jQuery(this).val()) {
 						alert("Oops! Looks like you have not filled out all of the required fields!");
